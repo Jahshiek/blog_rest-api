@@ -113,12 +113,14 @@ def get_all_posts():
     return jsonify({"error":" there are no posts to display"}), 404
 #########################################################################
 # Filter blog posts by a search term
-@posts_bp.route('/posts?term=<term>', methods=['GET'])
-def get_post_by_name(term):
-    return 'this is the <h1>all posts PAGE</h1>'
+@posts_bp.route('/search', methods=['GET'])
+def get_post_by_name():
+        term = request.args.get('term')
+        if not term:
+            return jsonify({"error": "No search term provided"}), 400
+        posts = Post.query.filter(Post.title.contains(term)).all()
+        if posts:
+            return jsonify({"data": [post.to_json() for post in posts]}), 201
+        return jsonify({"error": "page does not exist"}),404
 
 
-# @posts_bp.route('/simpledelete', methods=['DELETE'])
-# def simple_delete():
-#     print("Simple delete route hit")
-#     return jsonify({"message": "Simple delete route works"}), 200
