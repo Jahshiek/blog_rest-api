@@ -1,31 +1,31 @@
 # config.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from extensions import db
+from extensions import db,redis_client,redis_password,redis_host,redis_port
 from flask_cors import CORS
-from routes.posts_route import posts_bp  # Import Blueprint here
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import redis
-import os
-from dotenv import load_dotenv
+from routes.posts_route import posts_bp  # Import Blueprint here
+# import redis
+# import os
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
-redis_password= os.getenv("REDIS_PASSWORD")
-redis_host = os.getenv("REDIS_HOST")
-redis_port = int(os.getenv("REDIS_PORT", 6379))
+# redis_password= os.getenv("REDIS_PASSWORD")
+# redis_host = os.getenv("REDIS_HOST")
+# redis_port = int(os.getenv("REDIS_PORT", 6379))
 
 def create_app():
     app = Flask(__name__)
     CORS(posts_bp, origins="*", supports_credentials=True)
 
     #redis client setup
-    try:
-        redis_client = redis.Redis(host = redis_host, port = redis_port, password = redis_password, decode_responses=True)
-        redis_client.ping()
-    except redis.ConnectionError:
-        print("⚠️ Redis server not available! Ensure Redis is running.")
+    # try:
+    #     redis_client = redis.Redis(host = redis_host, port = redis_port, password = redis_password, decode_responses=True)
+    #     redis_client.ping()
+    # except redis.ConnectionError:
+    #     print("⚠️ Redis server not available! Ensure Redis is running.")
 
     # limiter
     limiter = Limiter(
