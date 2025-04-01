@@ -13,7 +13,7 @@ class Post(db.Model):
     category = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
-
+    
     # Many-to-Many Relationship
     tags = db.relationship("Tag", secondary=post_tags, backref=db.backref("posts", lazy="dynamic"))
 
@@ -23,11 +23,10 @@ class Post(db.Model):
             'title': self.title,
             'content': self.content,
             'category': self.category,
-            'tags': [tag.name for tag in self.tags],  # Include tags in the response
+            'tags': [tag.name for tag in self.tags],
             'createdAt': self.created_at.isoformat(),
             'updatedAt': self.updated_at.isoformat()
-             }
-
+        }
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,16 +36,4 @@ class Tag(db.Model):
         return {
             'id': self.id,
             'name': self.name,
-             }
-
-
-
-#     {
-#   "id": 1,
-#   "title": "My First Blog Post",
-#   "content": "This is the content of my first blog post.",
-#   "category": "Technology",
-#   "tags": ["Tech", "Programming"],
-#   "createdAt": "2021-09-01T12:00:00Z",
-#   "updatedAt": "2021-09-01T12:00:00Z"
-# # }
+        }

@@ -58,7 +58,13 @@ def update_post(id):
     post = Post.query.get(id)
 
     if not post:
-        jsonify({"error": "Youre not modifying the right post"}), 400
+        return jsonify({"error": "Youre not modifying the right post"}), 400
+
+    cache_id = f"post{id}"
+    # updated_cache_data = redis_client.get(cache_id)
+    if redis_client.exists(cache_id):
+        redis_client.delete(cache_id)
+
 
     data = request.get_json()
     print(data)
@@ -75,25 +81,12 @@ def update_post(id):
         post.category = category
 
         db.session.commit()
-        return jsonify({"message": "Message Created successfully", "data": post.to_json()}), 201
+
+        updated_cache_data = post.to_json() 
+        redis_client.setex(cache_id, 3600, json.dumps(updated_cache_data))
+        return jsonify({"message": "Post updated successfully", "data": post.to_json()}), 201
     except:
         return jsonify({"error": "Message could not be updated"})
-
-    
-
-
-# Delete an existing blog post
-# @posts_bp.route('/delete/<int:id>', methods=['DELETE'])
-# def delete_post(id):
-#     post = Post.query.get(id)
-
-#     if not post:
-#         jsonify({"error": "post does not exist"}), 400
-    
-#     db.session.delete(post)
-#     db.session.commit()
-
-#     return jsonify({"Message": "Post deleted succesfully"}), 201
 
 # Delete an existing blog post
 @posts_bp.route('/delete/<int:id>', methods=['DELETE', 'POST'])
@@ -180,153 +173,3 @@ def searched_post():
         redis_client.setex(cache_key, 3600, json.dumps(json_posts))
         return jsonify({"data": json_posts}),201
     return  jsonify({"error": "No posts found matching the search term"}), 404
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# #########################################################################
-# # Create a new blog post
-# # @posts_bp.route('/create', methods=['GET', 'POST'])
-# def create_post():
-#     ("Raw request body:", request.data)
-#     if request.method == "POST":
-#         data = request.get_json()
-
-#         title = data.get("title")
-#         content = data.get("content")
-#         category = data.get( "category")
-#         tag_names = data.get("tags")
-#     print(f"title: {title}, content: {content}, category: {category}")
-
-#     if not title or not content or not category:
-#         return jsonify({"error": "Missing required fields"}), 400
-    
-#     new_post = Post(title=title, content=content, category=category)
-
-#     tags = []
-#     for tag_name in tag_names:
-#         existing_tag = Tag.query.filter_by(name=tag_name).first()
-#         if not existing_tag:
-#             existing_tag = Tag(name=tag_name)
-#             db.session.add(existing_tag)
-#         tags.append(existing_tag)
-    
-#     new_post.tags = tags
-
-#     db.session.add(new_post)
-#     db.session.commit()
-
-#     return jsonify({"message": "Message created successfully", "data": new_post.to_json()}), 201
-# #########################################################################
-
-
-
-
-
-# # Update an existing blog post
-# @posts_bp.route('/update/<int:id>', methods=['PUT'])
-# def update_post(id):
-#     ("Raw request body:", request.data)
-#     data = request.get_json()
-
-#     title = data.get("title")
-#     content = data.get("content")
-#     category = data.get( "category")
-#     tag_names = data.get("tags")
-
-#     if not title or not content or not category:
-#         return jsonify({"error": "Missing required fields"}), 400
-    
-#     updated_Post = Post(title=title, content=content, category=category)
-
-#     db.session.add(updated_Post)
-#     db.session.commit()
-
-#     return jsonify({"message": "Missing required fields", "data": updated_Post.to_json()}), 201
-# #########################################################################
-
-
-
-
-# # Delete an existing blog post
-# @posts_bp.route('/delete/<int:id>', methods=['DELETE', 'POST'])
-# # @csrf.exempt
-# def delete_post(id):
-#     print(f"Delete endpoint reached for post ID: {id}")
-#     post = Post.query.get(id)
-
-#     if not post:
-#         return jsonify({"error": "message does not exist"}), 400
-
-#     db.session.delete(post)
-#     db.session.commit()
-#     return jsonify({"message": "Message deleted successfully"}), 201
-# #########################################################################
-
-
-
-# # Get a single blog post
-# @posts_bp.route('/uniquepost/<int:id>', methods=['GET'])
-# def get_single_post(id):
-#     post = Post.query.get(id)
-
-#     if post:
-#         return jsonify({"post": post.to_json()})
-#     return jsonify({"error": "post does not exist"}), 404
-# #########################################################################
-
-
-
-
-# # Get all blog posts
-# @posts_bp.route('/posts', methods=['GET'])
-# def get_all_posts():
-#     posts = Post.query.all()
-#     json_posts = list(map(lambda x: x.to_json(), posts))
-#     if json_posts:
-#         return jsonify({"posts": json_posts})
-#     return jsonify({"error":" there are no posts to display"}), 404
-# #########################################################################
-
-
-
-# # Filter blog posts by a search term
-# @posts_bp.route('/search', methods=['GET'])
-# def get_post_by_name():
-#         term = request.args.get('term')
-#         if not term:
-#             return jsonify({"error": "No search term provided"}), 400
-#         posts = Post.query.filter(Post.title.contains(term)).all()
-#         if posts:
-#             return jsonify({"data": [post.to_json() for post in posts]}), 201
-#         return jsonify({"error": "page does not exist"}),404
-
-

@@ -9,7 +9,6 @@ redis_password= os.getenv("REDIS_PASSWORD")
 redis_host = os.getenv("REDIS_HOST")
 redis_port = int(os.getenv("REDIS_PORT", 6379))
 
-
 db = SQLAlchemy()
 
 try:
@@ -18,8 +17,5 @@ try:
 except redis.ConnectionError:
     print("⚠️ Redis server not available! Ensure Redis is running.")
 
-# redis_client = redis.from_url(os.getenv("REDIS_HOST"), 
-#                                password=redis_password, 
-#                                port=redis_port, 
-#                                decode_responses=True)
+
 
